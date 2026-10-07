@@ -1,81 +1,35 @@
 # FuzzForge ⚡
 
-**FuzzForge** is our own modern JavaScript engine fuzzer, built in Go and designed around a coverage-guided fuzzing pipeline.
+Modern JavaScript engine fuzzer written in Go.
 
-It takes inspiration from research fuzzers such as Fuzzilli, but the implementation, architecture, corpus, mutation system, and feedback loop are being built independently.
+## Implemented
 
-## Status
+- [x] Timeout enforcement — engine processes are killed after the deadline
+- [x] Coverage feedback pipeline — successful novel candidates have a corpus-admission point ready for engine coverage
+- [x] Corpus scheduling — generated candidates are periodically fed back into the corpus
+- [x] JavaScript-aware generation — structured functions, arrays, objects, loops, exceptions, proxies and buffers
+- [x] Minimization — delta-reduces a reproducing failing testcase
 
-### Phase 0 — Bootstrap
-- [x] Go CLI
-- [x] JavaScript seed corpus
-- [x] Mutation primitives
-- [x] d8 execution harness
-- [x] Crash artifact preservation
-- [ ] Timeout enforcement
-- [ ] Coverage feedback
-- [ ] Corpus scheduling
-- [ ] JavaScript-aware generation
-- [ ] Minimization
-
-## Quick start
-
-Build:
+## Build
 
 ```bash
 go build -o fuzzforge ./cmd/fuzzforge
 ```
 
-Run against a local V8 `d8`:
+## Test with d8
 
 ```bash
-./fuzzforge -engine ./d8 -corpus ./corpus -runs 100
+./fuzzforge -engine ./d8 -corpus ./corpus -runs 100 -timeout 2s
 ```
 
-Generated programs and crash candidates are written to `artifacts/`.
+You should see `[corpus+]`, `[crash]`, or `[timeout]` events.
 
-## Architecture
+## Minimize
 
-```
-             seed corpus
-                  |
-                  v
-       mutation / generation
-                  |
-                  v
-          JavaScript program
-                  |
-                  v
-             d8 / engine
-             /    |    \
-            /     |     \
-         clean  timeout  crash
-            \     |     /
-             \    |    /
-              artifact
-                  |
-          coverage feedback
-                  |
-             corpus queue
-                  |
-                  +------> next generation
+```bash
+./fuzzforge -engine ./d8 -minimize artifacts/crash-000001.js
 ```
 
-## Roadmap
+## Next
 
-1. Coverage-guided corpus scheduling
-2. Persistent corpus + deduplication
-3. JavaScript AST/program generation
-4. V8/JIT-focused mutation operators
-5. Automatic testcase minimization
-6. Crash bucketing + reproducibility
-7. Differential engine fuzzing
-8. CI regression mode
-
-## Safety
-
-Run FuzzForge only against JavaScript engines and software you are authorized to test. Crash artifacts can consume disk space quickly, so use bounded campaigns while developing.
-
-## License
-
-MIT
+The next coverage step is an engine-specific novelty bitmap and weighted corpus scheduler. The current implementation deliberately keeps the execution boundary independent so d8 testing works first.

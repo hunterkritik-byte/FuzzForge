@@ -1,22 +1,3 @@
 package main
-
-import (
-	"flag"
-	"fmt"
-	"os"
-
-	"github.com/hunterkritik-byte/FuzzForge/internal/runner"
-)
-
-func main() {
-	engine := flag.String("engine", "d8", "JavaScript engine executable")
-	corpus := flag.String("corpus", "corpus", "seed corpus directory")
-	out := flag.String("out", "artifacts", "artifact directory")
-	runs := flag.Int("runs", 100, "number of executions")
-	flag.Parse()
-
-	if err := runner.Run(runner.Config{Engine:*engine, CorpusDir:*corpus, ArtifactDir:*out, Runs:*runs}); err != nil {
-		fmt.Fprintln(os.Stderr, "fuzzforge:", err)
-		os.Exit(1)
-	}
-}
+import("flag";"fmt";"os";"time";"github.com/hunterkritik-byte/FuzzForge/internal/minimize";"github.com/hunterkritik-byte/FuzzForge/internal/runner")
+func main(){engine:=flag.String("engine","d8","JavaScript engine executable");corpus:=flag.String("corpus","corpus","seed corpus directory");out:=flag.String("out","artifacts","artifact directory");runs:=flag.Int("runs",100,"number of executions");timeout:=flag.Duration("timeout",2*time.Second,"maximum execution time per testcase");min:=flag.String("minimize","","minimize a failing JavaScript file");flag.Parse();if *min!=""{data,e:=os.ReadFile(*min);if e!=nil{fmt.Fprintln(os.Stderr,e);os.Exit(1)};dst:=*min+".min.js";if e=os.WriteFile(dst,[]byte(minimize.Reduce(*engine,string(data),*timeout)),0644);e!=nil{fmt.Fprintln(os.Stderr,e);os.Exit(1)};fmt.Println("[minimized]",dst);return};if e:=runner.Run(runner.Config{Engine:*engine,CorpusDir:*corpus,ArtifactDir:*out,Runs:*runs,Timeout:*timeout});e!=nil{fmt.Fprintln(os.Stderr,"fuzzforge:",e);os.Exit(1)}}
