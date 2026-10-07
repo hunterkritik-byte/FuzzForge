@@ -15,14 +15,7 @@ func main() {
 	runs := flag.Int("runs", 100, "number of executions")
 	flag.Parse()
 
-	cfg := runner.Config{
-		Engine:      *engine,
-		CorpusDir:   *corpus,
-		ArtifactDir: *out,
-		Runs:        *runs,
-	}
-
-	if err := runner.Run(cfg); err != nil {
+	if err := runner.Run(runner.Config{Engine:*engine, CorpusDir:*corpus, ArtifactDir:*out, Runs:*runs}); err != nil {
 		fmt.Fprintln(os.Stderr, "fuzzforge:", err)
 		os.Exit(1)
 	}
